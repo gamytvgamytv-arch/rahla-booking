@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}رحلة{% endblock %} | رحلة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('home') }}"><span>رحلة</span><small>إقامات لها حكاية</small></a>
+    <nav>
+      <a href="{{ url_for('home') }}">استكشف</a>
+      {% if current_user %}<a href="{{ url_for('bookings') }}">حجوزاتي</a><span class="welcome">مرحبًا، {{ current_user }}</span><a class="button button-ghost" href="{{ url_for('logout') }}">خروج</a>{% else %}<a href="{{ url_for('login') }}">دخول</a><a class="button button-dark" href="{{ url_for('register') }}">أنشئ حسابًا</a>{% endif %}
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer><span>رحلة © 2026</span><span>خطط أقل، عش أكثر</span></footer>
+</body>
+</html>
