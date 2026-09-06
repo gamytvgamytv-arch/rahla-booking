@@ -131,7 +131,9 @@ def init_db():
             demo_rows.append((f"ملف تجريبي {index + 1:05d}", specialty, f"{city}، {country}", "هذا ملف تجريبي مولّد لعرض شكل المنصة، وليس أخصائيًا أو مؤسسة حقيقية.", "عرض تجريبي - لا يمكن الحجز", 0, 0, "demo", None, country, language, 1))
         db.executemany("INSERT INTO providers (name, specialty, location, description, offer, price, rating, image, owner_user_id, country, language, is_demo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", demo_rows)
     db.execute("UPDATE providers SET demo_views = ((id * 37) % 9000) + 1000, demo_likes = ((id * 11) % 1400) + 120, demo_reviews = ((id * 5) % 180) + 10 WHERE is_demo = 1 AND demo_views = 0")
-    seed_localized_demo_content(db)
+    if db.execute("SELECT value FROM platform_settings WHERE key = 'localized_demo_seeded'").fetchone() is None:
+        seed_localized_demo_content(db)
+        db.execute("INSERT INTO platform_settings (key, value) VALUES ('localized_demo_seeded', '1')")
     if db.execute("SELECT COUNT(*) FROM moderation_agents").fetchone()[0] == 0:
         db.executemany(
             "INSERT INTO moderation_agents (name, specialty) VALUES (?, ?)",
@@ -149,12 +151,13 @@ def seed_localized_demo_content(db):
         ("الجورجية", "جورجيا", "ვირტუალური ასისტენტი"), ("الألمانية", "ألمانيا", "Virtueller Assistent"),
     ]
     specialties = ["صحة نفسية", "قلب وأوعية دموية", "أطفال", "مناعة", "تحاليل وتشخيص", "تأهيل وعلاج طبيعي", "جلدية", "صحة المرأة", "صحة المسنين"]
+    demo_password = generate_password_hash("disabled-demo-account")
     for language, country, assistant_name in catalog:
         for specialty in specialties:
             email = f"virtual-{language}-{specialty}@demo.local"
             user = db.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
             if user is None:
-                cursor = db.execute("INSERT INTO users (name, email, password, role, country) VALUES (?, ?, ?, 'مساعد افتراضي', ?)", (assistant_name, email, generate_password_hash("disabled-demo-account"), country))
+                cursor = db.execute("INSERT INTO users (name, email, password, role, country) VALUES (?, ?, ?, 'مساعد افتراضي', ?)", (assistant_name, email, demo_password, country))
                 user_id = cursor.lastrowid
             else:
                 user_id = user["id"]
