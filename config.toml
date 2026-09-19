@@ -1,0 +1,3 @@
+[functions.weekly-compounder]
+verify_jwt = false
+entrypoint = "./functions/weekly-compounder/index.ts"
