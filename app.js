@@ -8,117 +8,135 @@ import { supabase } from './supabase.ts';
 
   const LANGS = {
     ar: ['العربية', 'rtl'], ru: ['Русский', 'ltr'], uz: ['O‘zbekcha', 'ltr'],
-    hy: ['Հայերեն', 'ltr'], tg: ['Тоҷикӣ', 'ltr'], uk: ['Українська', 'ltr'],
+    hy: ['Հايերեն', 'ltr'], tg: ['Тоҷикӣ', 'ltr'], uk: ['Українська', 'ltr'],
     az: ['Azərbaycanca', 'ltr'], ka: ['ქართული', 'ltr']
   };
 
   const I18N = {
     ar: { home:'الرئيسية', specialists:'الأخصائيون', questions:'الأسئلة والاستشارات', facilities:'المرافق الطبية', pharmacy:'الصيدليات', marketplace:'السوق الطبي', academy:'الأكاديمية', community:'المجتمع', articles:'المقالات', library:'المكتبة', tests:'الاختبارات', dashboard:'لوحتي', admin:'الإدارة', login:'دخول', signup:'تسجيل', ask:'اطرح سؤالاً', search:'بحث', slogan:'منصة سهلة وبسيطة للاستشارات الطبية والنفسية والتعليم المهني' },
     ru: { home:'Главная', specialists:'Специалисты', questions:'Вопросы', facilities:'Медицинские учреждения', pharmacy:'Аптеки', marketplace:'Медицинский рынок', academy:'Академия', community:'Сообщество', articles:'Статьи', library:'Библиотека', tests:'Тесты', dashboard:'Мой кабинет', admin:'Админ', login:'Войти', signup:'Регистрация', ask:'Задать вопрос', search:'Поиск', slogan:'Просто и легко: медицинские консультации и профессиональное обучение' },
-    uz: { home:'Bosh sahifa', specialists:'Mutaxassislar', questions:'Savollar', facilities:'Tibbiy markazlar', pharmacy:'Dorixonalar', marketplace:'Tibbiy bozor', academy:'Akademiya', community:'Hamjamiyat', articles:'Maqolalar', library:'Kutubxona', tests:'Testlar', dashboard:'Kabinet', admin:'Admin', login:'Kirish', signup:'Ro‘yxatdan o‘tish', ask:'Savol berish', search:'Qidirish', slogan:'Tibbiy maslahat va ta’lim platformasi' },
-    hy: { home:'Գլխավոր', specialists:'Մասնագետներ', questions:'Հարցեր', facilities:'Բժշկական կենترոններ', pharmacy:'Դեղատներ', marketplace:'Բժշկական շուկա', academy:'Ակադեմիա', community:'Համայնք', articles:'Հոդվածներ', library:'Գրադարան', tests:'Թեստեր', dashboard:'Իմ էջը', admin:'Ադմին', login:'Մուտք', signup:'Գրանցվել', ask:'Հարց տալ', search:'Որոնում', slogan:'Բժշկական խորհրդատվության և ուսուցման հարթակ' },
-    tg: { home:'Асосӣ', specialists:'Мутахассисон', questions:'Саволҳо', facilities:'Марказҳои тиббӣ', pharmacy:'Дорухонаҳо', marketplace:'Бозори тиббӣ', academy:'Академия', community:'Ҷомеа', articles:'Мақолаҳо', library:'Китобхона', tests:'Санҷишҳо', dashboard:'Кабинет', admin:'Админ', login:'Вуруд', signup:'Бақайдгирӣ', ask:'Савол додан', search:'Ҷустуҷӯ', slogan:'Платформаи машварати тиббӣ ва омӯзиш' },
-    uk: { home:'Головна', specialists:'Фахівці', questions:'Запитання', facilities:'Медичні заклади', pharmacy:'Аптеки', marketplace:'Медичний маркетплейс', academy:'Академія', community:'Спільнота', articles:'Статті', library:'Бібліотека', tests:'Тести', dashboard:'Мій кабінет', admin:'Адмін', login:'Увійти', signup:'Реєстрація', ask:'Поставити запитання', search:'Пошук', slogan:'Платформа медичних консультацій та навчання' },
-    az: { home:'Ana səhifə', specialists:'Mütəxəssislər', questions:'Suallar', facilities:'Tibb müəssisələri', pharmacy:'Apteklər', marketplace:'Tibbi bazar', academy:'Akademiya', community:'İcma', articles:'Məqalələr', library:'Kitabxana', tests:'Testlər', dashboard:'Kabinetim', admin:'Admin', login:'Daxil ol', signup:'Qeydiyyat', ask:'Sual ver', search:'Axtarış', slogan:'Tibbi məsləhət və təhsil platforması' },
-    ka: { home:'მთავარი', specialists:'სპეციალისტები', questions:'კითხვები', facilities:'სამედიცინო დაწესებულებები', pharmacy:'აფთიაქები', marketplace:'სამედიცინო ბაზარი', academy:'აკადემია', community:'საზოგადოება', articles:'სტატიები', library:'ბიბლიოთეკა', tests:'ტესტები', dashboard:'ჩემი კაბინეტი', admin:'ადმინი', login:'შესვლა', signup:'რეგისტრაცია', ask:'კითხვის დასმა', search:'ძიება', slogan:'სამედიცინო კონსულტაციებისა და განათლების პლატფორმა' }
+    uz: { home:'Bosh sahifa', specialists:'Mutaxassislar', questions:'Savollar', facilities:'Tibbiy markazlar', pharmacy:'Dorixonalar', marketplace:'Tibbiy bozor', academy:'Akademiya', community:'Hamjamiyat', articles:'Maqolalar', library:'Kutubxona', tests:'Testlar', dashboard:'Kabinet', admin:'Admin', login:'Kirish', signup:'Ro‘yxatdan o‘tish', ask:'Savol berish', search:'Qidirish', slogan:'Tibbiy maslahat va ta’lim platformasi' }
   };
 
   let lang = localStorage.getItem('sb_lang') || 'ar';
   if (!LANGS[lang]) lang = 'ar';
-  let searchTerm = '';
+  let currentPath = window.location.hash || '#/';
   let activeUser = null;
   let walletStats = { balance: 0, total_earned: 0 };
   let dbQuestions = [];
 
-  // دالة تسجيل الدخول الحقيقية والربط الفوري مع الحسابات الـ 8
-  async function handleLogin(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      window.toast('خطأ في الدخول: ' + error.message);
-      return;
+  async function init() {
+    const { data: { user } } = await supabase.auth.getUser();
+    activeUser = user;
+    if (activeUser) {
+      await fetchLiveWalletData();
+      await fetchLiveQuestions();
     }
-    activeUser = data.user;
-    window.toast('تم تسجيل الدخول بنجاح!');
-    await fetchLiveWalletData();
-    await fetchLiveQuestions();
     render();
   }
 
-  // دالة جلب الرصيد الحقيقي من دالة دفتر الأستاذ السحابية (Ledger System)
+  async function handleLogin(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { window.toast('خطأ: ' + error.message); return; }
+    activeUser = data.user;
+    window.location.hash = '#/';
+    await init();
+  }
+
   async function fetchLiveWalletData() {
-    const { data, error } = await supabase.rpc('get_platform_stats');
-    if (!error && data && data.wallet) {
+    const { data } = await supabase.rpc('get_platform_stats');
+    if (data && data.wallet) {
       walletStats.balance = data.wallet.balance || 0;
       walletStats.total_earned = data.wallet.total_earned || 0;
     }
   }
 
-  // دالة جلب الأسئلة الحية التفاعلية من قاعدة البيانات
   async function fetchLiveQuestions() {
-    const { data, error } = await supabase.from('questions').select('*').order('created_at', { ascending: false });
-    if (!error && data) {
-      dbQuestions = data;
-    }
+    const { data } = await supabase.from('questions').select('*').order('created_at', { ascending: false });
+    if (data) dbQuestions = data;
   }
 
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":''','"':'&quot;'}[ch]));
   const tr = key => (I18N[lang] && I18N[lang][key]) || I18N.ar[key] || key;
-  const currency = code => ({SAR:'ر.س',RUB:'₽',USD:'\$',EGP:'ج.م'})[code] || code;
 
-  function setLang(next) {
-    if (!LANGS[next]) return;
-    lang = next;
-    localStorage.setItem('sb_lang', next);
-    document.documentElement.lang = next;
-    document.documentElement.dir = LANGS[next][1];
-    render();
-  }
-
-  window.setLang = setLang;
-  window.handleLogin = handleLogin;
-
-  // هيكل واجهة المستخدم الرأسية المتصل بالمنصة
   function header() {
-    return `<header class="top">
-      <div class="bar">
-        <a class="logo" href="#/"><span class="mark">✚</span>سهل وبسيط</a>
-        <form class="searchForm" onsubmit="return false;"><input class="search" value="${esc(searchTerm)}" placeholder="${esc(tr('search'))}"></form>
-        <select class="lang" aria-label="Language" onchange="setLang(this.value)">${Object.entries(LANGS).map(([k,v]) => `<option value="\${k}" k===lang?'selected':''>{esc(v[0])}</option>`).join('')}</select>
-        <a class="secondary" href="#/dashboard">${activeUser ? activeUser.email : esc(tr('dashboard'))}</a>
+    return `<header class="top" style="background: #1e293b; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+      <a class="logo" href="#/" style="color: white; font-weight: bold; text-decoration: none;">✚ سهل وبسيط</a>
+      <nav class="nav" style="display: flex; gap: 15px;">
+        <a href="#/" style="color: white;">${esc(tr('home'))}</a>
+        <a href="#/questions" style="color: white;">${esc(tr('questions'))}</a>
+        <a href="#/dashboard" style="color: white;">${esc(tr('dashboard'))}</a>
+      </nav>
+      <div>
+        <select onchange="window.setLang(this.value)" style="padding: 5px; border-radius: 4px;">
+          ${Object.entries(LANGS).map(([k,v]) => `<option value="\${k}" k===lang?'selected':''>{esc(v[0])}</option>`).join('')}
+        </select>
+        ${activeUser ? `<span style="margin-left:10px;">\${activeUser.email}</span>` : `<a href="#/login" style="color: white; margin-left:10px;">\${esc(tr('login'))}</a>`}
       </div>
     </header>`;
   }
 
+  function viewHome() {
+    return `<div style="padding:20px; direction: ${LANGS[lang][1]}; text-align: start;">
+      <h2>${esc(tr('slogan'))}</h2>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px; margin-top:20px;">
+        <div style="background:#f1f5f9; padding:20px; border-radius:8px;"><h3>🩺 العيادات والأخصائيون</h3><p>استشارات طبية مباشرة ونفسية مع كبار الأطباء.</p><a href="#/specialists">تصفح الأطباء ←</a></div>
+        <div style="background:#f1f5f9; padding:20px; border-radius:8px;"><h3>💊 الصيدلية الرقمية</h3><p>اطلب أدويتك ومستلزماتك الطبية بأسعار تنافسية.</p><a href="#/pharmacy">دخول المتجر ←</a></div>
+        <div style="background:#f1f5f9; padding:20px; border-radius:8px;"><h3>🎓 الأكاديمية والمكتبة</h3><p>كورسات معتمدة في تحليل السلوك ABA وعلم النفس.</p><a href="#/academy">ابدأ التعلم ←</a></div>
+      </div>
+    </div>`;
+  }
+
+  function viewQuestions() {
+    return `<div style="padding:20px; direction: ${LANGS[lang][1]}; text-align: start;">
+      <h2>📌 الأسئلة والاستشارات الحية الحالية</h2>
+      <div style="margin-bottom: 20px;"><a href="#/ask" style="background:#0284c7; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">${esc(tr('ask'))}</a></div>
+      ${dbQuestions.length === 0 ? '<p>لا توجد أسئلة منشورة حالياً، سجل دخولك لرؤية بيانات السيرفر.</p>' : dbQuestions.map(q => `
+        <div style="background:#fff; border:1px solid #e2e8f0; padding:15px; border-radius:8px; margin-bottom:15px;">
+          <h4>\${esc(q.title)}</h4><p style="color:#64748b;">\${esc(q.body)}</p>
+          <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-size:12px;">\${esc(q.status)}</span>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+
+  function viewDashboard() {
+    return `<div style="padding:20px; direction: ${LANGS[lang][1]}; text-align: start;">
+      <h2>💼 لوحة التحكم المالية والشخصية (Dashboard)</h2>
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:20px; border-radius:8px; margin:20px 0;">
+        <h4>💰 رصيد المحفظة الدفتري الحقيقي (Ledger System):</h4>
+        <p>الرصيد المتاح حالياً: <span style="font-size:20px; color:#16a34a; font-weight:bold;">${walletStats.balance} USD</span></p>
+        <p>إجمالي الأرباح التراكمية المستلمة: <strong>${walletStats.total_earned} USD</strong></p>
+      </div>
+    </div>`;
+  }
+
+  function viewLogin() {
+    return `<div style="padding:40px; max-width:400px; margin: 0 auto; text-align: center;">
+      <h2>تسجيل الدخول للمنصة</h2>
+      <form onsubmit="event.preventDefault(); window.handleLogin(this.email.value, this.password.value);" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+        <input type="email" name="email" placeholder="البريد الإلكتروني" required style="padding:10px; border:1px solid #ccc; border-radius:4px;">
+        <input type="password" name="password" placeholder="كلمة المرور" required style="padding:10px; border:1px solid #ccc; border-radius:4px;">
+        <button type="submit" style="background:#0284c7; color:white; padding:10px; border:none; border-radius:4px; cursor:pointer;">دخول</button>
+      </form>
+    </div>`;
+  }
+
   function render() {
+    let content = viewHome();
+    if (currentPath === '#/questions') content = viewQuestions();
+    else if (currentPath === '#/dashboard') content = viewDashboard();
+    else if (currentPath === '#/login') content = viewLogin();
+
     root.innerHTML = `
       ${header()}
-      <main class="content" style="padding: 20px; direction: ${LANGS[lang][1]}; text-align: start;">
-        <h1>${esc(tr('slogan'))}</h1>
-        <div class="wallet-box" style="background: #eef; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h3>💰 محفظتي المالية الحقيقية (Ledger System):</h3>
-          <p>الرصيد المتاح: <strong>${walletStats.balance} USD</strong></p>
-          <p>إجمالي الأرباح التراكمية: <strong>${walletStats.total_earned} USD</strong></p>
-        </div>
-        <div class="questions-list">
-          <h3>📌 الأسئلة والاستشارات المباشرة من السيرفر:</h3>
-          ${dbQuestions.length === 0 ? '<p>لا توجد أسئلة حية حالياً. سجل دخولك لجلب البيانات.</p>' : dbQuestions.map(q => `
-            <div style="border-bottom: 1px solid #ccc; padding: 10px 0;">
-              <h4>\${esc(q.title)}</h4>
-              <p>\${esc(q.body)}</p>
-              <span style="background: #dfd; padding: 2px 6px; border-radius: 4px;">\${esc(q.status)}</span>
-            </div>
-          `).join('')}
-        </div>
-      </main>
+      <div style="min-height: 80vh; background:#fafafa;">${content}</div>
     `;
   }
 
-  // بدء تشغيل وتثبيت النظام المحدث تلقائياً
-  fetchLiveWalletData().then(() => {
-    fetchLiveQuestions().then(() => {
-      render();
-    });
-  });
+  window.setLang = (next) => { lang = next; localStorage.setItem('sb_lang', next); init(); };
+  window.handleLogin = handleLogin;
+  window.addEventListener('hashchange', () => { currentPath = window.location.hash; render(); });
 
+  init();
 })();
-
