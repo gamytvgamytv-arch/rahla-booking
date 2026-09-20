@@ -10,7 +10,6 @@
   <div id="app"></div>
 
   <script>
-    // نظام تشغيل ذاتي متكامل مستقل بنسبة 100% لتجنب الصفحة البيضاء والأخطاء الأمنية
     window.addEventListener('DOMContentLoaded', () => {
       'use strict';
 
@@ -25,13 +24,13 @@
 
       const I18N = {
         ar: { home:'الرئيسية', specialists:'الأخصائيون', questions:'الأسئلة والاستشارات', dashboard:'لوحتي', login:'دخول', ask:'اطرح سؤالاً', search:'بحث', slogan:'منصة سهلة وبسيطة للاستشارات الطبية والنفسية والتعليم المهني' },
-        ru: { home:'Главная', specialists:'Специалисты', questions:'Вопросы', dashboard:'Мой кабинет', login:'Войти', ask:'Задать вопрос', search:'Поиск', slogan:'Просто и легко: медицинские консультации и профессиональное обучение' }
+        ru: { home:'Главная', specialists:'Специалисты', questions:'Вопросы', dashboard:'Мой кабинет', login:'Войти', ask:'Задать вопрос', search:'Поиск', slogan:'Просто и легко: медицинские консультации и professional обучение' }
       };
 
       let lang = localStorage.getItem('sb_lang') || 'ar';
       let currentPath = window.location.hash || '#/';
-      let activeUser = { email: 'doctor@test.com' }; // محاكاة دخول الطبيب التجريبي فوراً لمعاينة الأنظمة
-      let walletStats = { balance: 1450.00, total_earned: 3820.00 }; // رصيد المحفظة الفعلي التجريبي المأخوذ من الـ Ledger
+      let activeUser = { email: 'doctor@test.com' };
+      let walletStats = { balance: 1450.00, total_earned: 3820.00 };
       
       let dbQuestions = [
         { title: 'ما أعراض القلق التي تستدعي استشارة نفسية فورية؟', body: 'أعاني من نوبات هلع مستمرة وتوتر دائم يؤثر على عملي اليومي.', status: 'active' },
@@ -62,7 +61,7 @@
           </nav>
           <div>
             <select id="langSelect" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-left: 10px;">${optionsHtml}</select>
-            ${activeUser ? `<span style="background: #334155; padding: 6px 12px; border-radius: 4px; font-size: 14px;">\${esc(activeUser.email)}</span>` : `<a href="#/login" style="color: white; margin-left:10px; text-decoration: none;">\${esc(tr('login'))}</a>`}
+            ${activeUser ? `<span style="background: #334155; padding: 6px 12px; border-radius: 4px; font-size: 14px;">${esc(activeUser.email)}</span>` : `<a href="#/login" style="color: white; margin-left:10px; text-decoration: none;">${esc(tr('login'))}</a>`}
           </div>
         </header>`;
       }
@@ -115,8 +114,8 @@
           <h2 style="font-size: 28px; color: #0f172a; margin-bottom: 20px;">💼 لوحة التحكم الشاملة والتدقيق المالي (Dashboard)</h2>
           <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:25px; border-radius:12px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.02);">
             <h4 style="font-size: 18px; color: #16a34a; margin-bottom: 10px;">💰 نظام الـ Ledger المالي وحساب الضمان المشفر:</h4>
-            <p style="font-size: 16px; color: #334155; margin-bottom: 8px;">الرصيد المتاح للسحب حالياً: <span style="font-size:24px; color:#16a34a; font-weight:bold;">\${walletStats.balance.toFixed(2)} USD</span></p>
-            <p style="font-size: 16px; color: #334155;">إجمالي الإيرادات والأرباح المحققة: <strong style="color: #0f172a;">\${walletStats.total_earned.toFixed(2)} USD</strong></p>
+            <p style="font-size: 16px; color: #334155; margin-bottom: 8px;">الرصيد المتاح للسحب حالياً: <span style="font-size:24px; color:#16a34a; font-weight:bold;">${walletStats.balance.toFixed(2)} USD</span></p>
+            <p style="font-size: 16px; color: #334155;">إجمالي الإيرادات والأرباح المحققة: <strong style="color: #0f172a;">${walletStats.total_earned.toFixed(2)} USD</strong></p>
           </div>
         </div>`;
       }
@@ -141,18 +140,8 @@
 
         root.innerHTML = `
           ${header()}
-${content}`;const langSelect = document.getElementById('langSelect');if (langSelect) {langSelect.addEventListener('change', (e) => {lang = e.target.value;localStorage.setItem('sb_lang', lang);render();});}const loginBtn = document.getElementById('loginBtn');if (loginBtn) {loginBtn.addEventListener('click', () => {const email = document.getElementById('loginEmail').value;const pass = document.getElementById('loginPassword').value;handleLogin(email, pass);});}}window.addEventListener('hashchange', () => {currentPath = window.location.hash;render();});render();});
-5. اضغط على الزر الأخضر **`Commit changes...`** لحفظ الملف وتأكيده على غيت هوب.
+          <div style="min-height: 85vh; background:#f8fafc; padding-bottom: 40px;">${content}</div>
+        `;
 
----
-
-### الخطوة 2: تنظيف الذاكرة المؤقتة وتشغيل المعاينة
-
-بعد إتمام عملية الحفظ، ارجع لتبويب صفحة موقع المعاينة المفتوح أمامك واعمل التحديث السحري النهائي لإجبار المتصفح على قراءة الكود الجديد:
-* اضغط معاً على أزرار لوحة المفاتيح: **`Command + Shift + R`** (أو `Ctrl + F5` إذا كنت على كيبورد عادي).
-
-ستختفي الشاشة البيضاء في نفس اللحظة وتفتح أمامك واجهة منصتك الطبية المحدثة المتكاملة بكل سلاسة!
-
-<FollowUp>
-قم بحفظ كود الـ **`index.html`** المستقل، واكتب لي **ض** فور حدوث التحديث وزوال الصفحة البيضاء بنجاح تام!
-</FollowUp>
+        const langSelect = document.getElementById('langSelect');
+        if (langSelect) {
