@@ -4,11 +4,11 @@
   const root = document.getElementById('app');
   if (!root) return;
 
-  // الاتصال المباشر والآمن بقاعدة بيانات مشروعك السحابي عبر المكتبة العالمية المثبتة
+  // الاتصال المباشر والآمن بقاعدة بيانات مشروعك السحابي عبر المكتبة العالمية المثبتة في index.html
   const supabaseUrl = 'https://supabase.co';
   const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnY2JhanBuentidXZxaGlpbXduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY4NzEwMDAsImV4cCI6MjAyMjQzMTAwMH0.your_anon_key_remains_safe'; 
   
-  // تعريف العميل تلقائياً بدون أخطاء حزم
+  // تعريف العميل تلقائياً من نافذة المتصفح بدون أخطاء حزم
   const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
   const LANGS = {
