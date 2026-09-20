@@ -5,3 +5,4 @@ __pycache__/
 booking.db
 .pytest_cache/
 .DS_Store
+node_modules
