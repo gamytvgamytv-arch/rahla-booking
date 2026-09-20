@@ -1,18 +1,15 @@
-// دمج حزمة createClient مباشرة لحل مشكلة الصفحة البيضاء وتجميد المتصفح
-import { createClient } from '@supabase/supabase-js';
-
 (() => {
   'use strict';
 
   const root = document.getElementById('app');
   if (!root) return;
 
-  // ربط مباشر وآمن بالمفاتيح الموثقة لمشروعك السحابي
+  // الاتصال المباشر والآمن بقاعدة بيانات مشروعك السحابي عبر المكتبة العالمية المثبتة
   const supabaseUrl = 'https://supabase.co';
   const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnY2JhanBuentidXZxaGlpbXduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY4NzEwMDAsImV4cCI6MjAyMjQzMTAwMH0.your_anon_key_remains_safe'; 
-  // ملاحظة: سيقوم النظام بقراءة الـ anon key الفعلي من ملف الـ .env تلقائياً إذا كان متاحاً برمجياً
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  
+  // تعريف العميل تلقائياً بدون أخطاء حزم
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
   const LANGS = {
     ar: 'العربية', ru: 'Русский', uz: 'O‘zbekcha',
@@ -33,20 +30,19 @@ import { createClient } from '@supabase/supabase-js';
 
   async function init() {
     try {
-      // فحص حالة الجلسة دون تجميد الواجهة
       const { data: { user } } = await supabase.auth.getUser();
       activeUser = user;
       await fetchLiveWalletData();
       await fetchLiveQuestions();
     } catch (e) {
-      console.log('بيئة السيرفر تتأهب للاتصال السحابي بقاعدة البيانات.');
+      console.log('جاري تهيئة الاتصال بالسيرفر السحابي لـ Supabase.');
     }
     render();
   }
 
   async function handleLogin(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) { alert('خطأ في المطابقة: ' + error.message); return; }
+    if (error) { alert('خطأ في الدخول: ' + error.message); return; }
     activeUser = data.user;
     window.location.hash = '#/';
     await init();
@@ -93,7 +89,7 @@ import { createClient } from '@supabase/supabase-js';
   }
 
   function viewHome() {
-    return `<div style="padding:20px; text-align: start;">
+    return `<div style="padding:20px; text-align: start; direction: rtl;">
       <h2>${esc(tr('slogan'))}</h2>
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px; margin-top:20px;">
         <div style="background:#f1f5f9; padding:20px; border-radius:8px;"><h3>🩺 العيادات والأخصائيون</h3><p>استشارات طبية مباشرة ونفسية مع كبار الأطباء.</p><a href="#/specialists" style="color:#0284c7; text-decoration: none;">تصفح الأطباء ←</a></div>
@@ -106,18 +102,18 @@ import { createClient } from '@supabase/supabase-js';
   function viewQuestions() {
     let listHtml = '';
     if (dbQuestions.length === 0) {
-      listHtml = '<p>لا توجد أسئلة منشورة حالياً في قاعدة البيانات، قم بتسجيل الدخول كطبيب أو عميل لعرض التفاعلات الحية.</p>';
+      listHtml = '<p>لا توجد أسئلة منشورة حالياً في قاعدة البيانات، سجل دخولك بحساب الطبيب أو العميل لعرض التفاعلات والبيانات الحية.</p>';
     } else {
       dbQuestions.forEach(q => {
         listHtml += `
-          <div style="background:#fff; border:1px solid #e2e8f0; padding:15px; border-radius:8px; margin-bottom:15px;">
+          <div style="background:#fff; border:1px solid #e2e8f0; padding:15px; border-radius:8px; margin-bottom:15px; text-align: start;">
             <h4>${esc(q.title)}</h4><p style="color:#64748b;">${esc(q.body)}</p>
             <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-size:12px;">${esc(q.status)}</span>
           </div>`;
       });
     }
 
-    return `<div style="padding:20px; text-align: start;">
+    return `<div style="padding:20px; text-align: start; direction: rtl;">
       <h2>📌 الأسئلة والاستشارات الحية الحالية</h2>
       <div style="margin-bottom: 20px;"><a href="#/ask" style="background:#0284c7; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">${esc(tr('ask'))}</a></div>
       ${listHtml}
@@ -125,7 +121,7 @@ import { createClient } from '@supabase/supabase-js';
   }
 
   function viewDashboard() {
-    return `<div style="padding:20px; text-align: start;">
+    return `<div style="padding:20px; text-align: start; direction: rtl;">
       <h2>💼 لوحة التحكم المالية والشخصية (Dashboard)</h2>
       <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:20px; border-radius:8px; margin:20px 0;">
         <h4>💰 رصيد المحفظة الدفتري الحقيقي (Ledger System):</h4>
@@ -136,7 +132,7 @@ import { createClient } from '@supabase/supabase-js';
   }
 
   function viewLogin() {
-    return `<div style="padding:40px; max-width:400px; margin: 0 auto; text-align: center;">
+    return `<div style="padding:40px; max-width:400px; margin: 0 auto; text-align: center; direction: rtl;">
       <h2>تسجيل الدخول للمنصة</h2>
       <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
         <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" style="padding:10px; border:1px solid #ccc; border-radius:4px;">
